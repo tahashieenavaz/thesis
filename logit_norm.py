@@ -59,7 +59,7 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
     # epochs end
     flush(f"fold {fold + 1} was finished")
 
-    scores = torch.tensor([])
+    scores = torch.tensor([], device=device)
     with torch.inference_mode():
         model.eval()
         for x_batch, y_batch in test_dataloader:
