@@ -2,10 +2,10 @@ import torch
 import numpy as np
 import pandas as pd
 
-from tqdm.auto import tqdm
 from datasets import portraits
 from functions import get_device
 from functions import load_settings
+from functions import flush
 from metrics import get_accuracy
 from scores import energy_score
 from torchvision.models import resnet18 as resnet
@@ -22,7 +22,7 @@ settings = load_settings()
 kf = KFold(n_splits=settings.folds)
 
 
-energies = []
+thresholds = []
 accuracies = []
 
 for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
@@ -42,30 +42,37 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
         test, shuffle=False, batch_size=settings.batch_size
     )
 
-    for epoch in tqdm(range(settings.epochs)):
+    for epoch in range(settings.epochs):
         train_dataloader = torch.utils.data.DataLoader(
             train, shuffle=True, batch_size=settings.batch_size
         )
 
         model.train()
-        for x_batch, y_batch in tqdm(train_dataloader):
+        for x_batch, y_batch in train_dataloader:
             x_batch, y_batch = x_batch.to(device), y_batch.to(device)
             optimizer.zero_grad()
             loss = criterion(model(x_batch), y_batch)
             loss.backward()
             optimizer.step()
         scheduler.step()
-
+        flush(f"\tepoch {epoch + 1} was finished")
     # epochs end
+    flush(f"fold {fold + 1} was finished")
+
+    scores = torch.tensor([])
     with torch.inference_mode():
         model.eval()
         for x_batch, y_batch in test_dataloader:
+            x_batch, y_batch = x_batch.to(device), y_batch.to(device)
             logits = model(x_batch)
             energy = energy_score(logits)
+            scores = torch.cat((energy.flatten(), scores.flatten()))
+            flush(scores)
 
     accuracy = get_accuracy(model, test)
     accuracies.append(accuracy)
-    energies.append(energy)
+    threshold = torch.quantile(scores, 0.95)
+    thresholds.append(threshold)
     torch.save(model.state_dict(), f"./fold-{fold + 1}.pt")
 
-pd.DataFrame({"accuracy": accuracies, "energy": energies}).to_csv("./data.csv")
+pd.DataFrame({"accuracy": accuracies, "threshold": thresholds}).to_csv("./data.csv")
