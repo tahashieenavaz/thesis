@@ -7,6 +7,10 @@ def get_device():
     return torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
+def flush(message: str):
+    print(message, flush=True)
+
+
 def reset_model(model):
     for layer in model.layers:
         layer.reset_parameters()

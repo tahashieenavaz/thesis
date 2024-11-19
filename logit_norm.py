@@ -35,7 +35,6 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
     optimizer = torch.optim.Adam(
         list(model.parameters()) + [criterion.temperature],
         settings.lr,
-        weight_decay=pow(10, -5),
     )
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, gamma=0.1, step_size=10)
 
