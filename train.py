@@ -26,9 +26,10 @@ create_folder("./models")
 
 thresholds = []
 accuracies = []
-rocs = []
 mccs = []
 
+
+flush(f"The dataset has {num_classes} classes")
 
 for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
     train = torch.utils.data.Subset(dataset, train_idx)
@@ -79,20 +80,18 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
 
     threshold = torch.quantile(scores, 0.95).item()
     accuracy = get_accuracy(model, test_dataloader)
-    roc = get_roc(model, test_dataloader)
     mcc = get_mcc(model, test_dataloader, num_classes)
 
     accuracies.append(accuracy)
     thresholds.append(threshold)
     mccs.append(mcc)
-    rocs.append(roc)
 
     torch.save(model.state_dict(), f"./models/fold-{fold + 1}.pt")
-    flush(f"\n\taccuracy: {accuracy}, roc: {roc}, threshold: {threshold}, mcc: {mcc}")
+    flush(f"\n\taccuracy: {accuracy}, threshold: {threshold}, mcc: {mcc}")
 
 
 results_df = pd.DataFrame(
-    {"accuracy": accuracies, "threshold": thresholds, "mcc": mccs, "roc": rocs}
+    {"accuracy": accuracies, "threshold": thresholds, "mcc": mccs}
 )
 results_df.index.name = "id"
 results_df.to_csv("./data.csv")
