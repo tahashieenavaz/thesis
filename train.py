@@ -9,6 +9,8 @@ from functions import flush
 from functions import seed
 from functions import create_folder
 from metrics import get_accuracy
+from metrics import get_roc
+from metrics import get_mcc
 from scores import energy_score
 from losses import LogitNormLoss
 from torchvision.models import resnet18 as resnet
@@ -16,20 +18,24 @@ from sklearn.model_selection import KFold
 
 
 seed()
-dataset = portraits()
+dataset, num_classes = portraits()
 device = get_device()
 settings = load_settings()
 kf = KFold(n_splits=settings.folds)
+create_folder("./models")
 
 thresholds = []
 accuracies = []
-create_folder("./models")
+rocs = []
+mccs = []
+
 
 for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
     train = torch.utils.data.Subset(dataset, train_idx)
     test = torch.utils.data.Subset(dataset, test_idx)
 
     model = resnet().to(device)
+    resnet.fc = torch.nn.Linear(model.fc.in_features, num_classes)
 
     criterion = LogitNormLoss()
     optimizer = torch.optim.Adam(
@@ -70,15 +76,25 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
             scores = torch.cat((batch_scores.flatten(), scores.flatten()))
             flush(scores)
 
-    accuracy = get_accuracy(model, test)
-    accuracies.append(accuracy)
+    accuracy = get_accuracy(model, test_dataloader)
+    threshold = torch.quantile(scores, 0.95).item()
+    roc = get_roc(model, test_dataloader)
+    mcc = get_mcc(model, test_dataloader, num_classes)
 
-    threshold = torch.quantile(scores, 0.95)
-    thresholds.append(threshold.item())
+    accuracies.append(accuracy)
+    thresholds.append(threshold)
+    mccs.append(mcc)
+    rocs.append(roc)
 
     torch.save(model.state_dict(), f"./models/fold-{fold + 1}.pt")
+    flush(f"\n\taccuracy: {accuracy}, roc: {roc}, threshold: {threshold}, mcc: {mcc}")
 
 
-results_df = pd.DataFrame({"accuracy": accuracies, "threshold": thresholds})
+results_df = pd.DataFrame(
+    {
+        "accuracy": accuracies,
+        "threshold": thresholds,
+    }
+)
 results_df.index.name = "id"
 results_df.to_csv("./data.csv")

@@ -24,7 +24,7 @@ class ImageDataset(torch.utils.data.Dataset):
         if self.transform:
             image = self.transform(image)
 
-        return image, torch.tensor(label, dtype=torch.long)
+        return image, torch.tensor(label - 1, dtype=torch.long)
 
 
 def build_transforms():
@@ -48,20 +48,23 @@ def build_transforms():
 
 def portraits(filename="portraits.mat"):
     """
-    The function `portraits` loads image data from a .mat file and returns an ImageDataset object with
-    the images and labels.
+    The function `portraits` loads image data from a .mat file and returns an ImageDataset object along
+    with the number of unique labels in the data.
 
-    :param filename: The `filename` parameter is a string that specifies the name of the file containing
-    the portraits data. In this case, the default filename is "portraits.mat", defaults to portraits.mat
-    (optional)
-    :return: The function `portraits` is returning an `ImageDataset` object with images and labels
-    loaded from a MATLAB file named "portraits.mat" located in the "./datasets/" directory. The images
-    are extracted from the first element of the `data` array, and the labels are extracted from the
-    second element of the `data` array. The function also applies transformations to the images using
-    the `build
+    :param filename: The `filename` parameter is a string that represents the name of the file
+    containing the portraits data. The default value for this parameter is "portraits.mat", defaults to
+    portraits.mat (optional)
+    :return: The function `portraits` is returning a list containing two elements:
+    1. An `ImageDataset` object created with images and labels extracted from the loaded data, along
+    with a specified transformation.
+    2. The number of unique labels present in the data.
     """
     data = mat73.loadmat(path(f"./datasets/{filename}"))["DATA"]
-    return ImageDataset(images=data[0], labels=data[1], transform=build_transforms())
+
+    return [
+        ImageDataset(images=data[0], labels=data[1], transform=build_transforms()),
+        len(set(data[1])),
+    ]
 
 
 def dummy_classification_dataset(as_numpy=False):
