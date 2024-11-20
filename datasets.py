@@ -76,25 +76,3 @@ def portraits(filename="portraits.mat"):
         ),
         len(set(labels)),
     ]
-
-
-def dummy_classification_dataset(as_numpy=False):
-    x, y = make_classification(
-        n_samples=1000, n_features=20, n_informative=10, n_redundant=5, n_classes=5
-    )
-
-    if as_numpy:
-        return [x, y]
-
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
-    x_train, y_train, x_test, y_test = (
-        torch.tensor(x_train, dtype=torch.float),
-        torch.tensor(y_train, dtype=torch.long),
-        torch.tensor(x_test, dtype=torch.float),
-        torch.tensor(y_test, dtype=torch.long),
-    )
-
-    train_dataset = torch.utils.data.TensorDataset(x_train, y_train)
-    test_dataset = torch.utils.data.TensorDataset(x_test, y_test)
-
-    return [train_dataset, test_dataset]

@@ -81,7 +81,9 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
     # epochs end
     flush(f"fold {fold + 1} was finished")
 
-    threshold = torch.quantile(get_scores(model, energy_score), 0.95).item()
+    threshold = torch.quantile(
+        get_scores(model, energy_score, test_dataloader), 0.95
+    ).item()
     accuracy = get_accuracy(model, test_dataloader)
     kappa = get_kappa(model, test_dataloader)
     f1 = get_f1(model, test_dataloader)
