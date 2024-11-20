@@ -103,7 +103,9 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
     f1s.append(f1)
 
     torch.save(fold_model.state_dict(), f"./models/fold-{fold + 1}.pt")
-    flush(f"\n\taccuracy: {accuracy}, threshold: {threshold}, f1: {f1}, kappa: {kappa}")
+    flush(
+        f"\n\taccuracy: {best_accuracy}, threshold: {threshold}, f1: {f1}, kappa: {kappa}"
+    )
 
 
 results_df = pd.DataFrame(
