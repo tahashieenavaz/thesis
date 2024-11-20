@@ -16,6 +16,7 @@ from scores import energy_score
 from scores import get_scores
 from losses import LogitNormLoss
 from sklearn.model_selection import KFold
+from copy import deepcopy
 
 
 seed()
@@ -38,6 +39,10 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
     test = torch.utils.data.Subset(dataset, test_idx)
 
     model = build_model(num_classes)
+
+    fold_model = None
+    best_accuracy = float("-inf")
+
     criterion = LogitNormLoss()
     cnn_params = [
         param for name, param in model.named_parameters() if not name.startswith("fc")
@@ -77,30 +82,32 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
             optimizer.step()
             epoch_loss += loss.item()
         scheduler.step()
+
+        accuracy = get_accuracy(model, test_dataloader)
+        if accuracy > best_accuracy:
+            fold_model = deepcopy(model)
+
         flush(f"\tepoch {epoch + 1} was finished with {epoch_loss}")
     # epochs end
     flush(f"fold {fold + 1} was finished")
 
     threshold = torch.quantile(
-        get_scores(model, energy_score, test_dataloader), 0.95
+        get_scores(fold_model, energy_score, test_dataloader), 0.95
     ).item()
-    accuracy = get_accuracy(model, test_dataloader)
-    kappa = get_kappa(model, test_dataloader)
-    f1 = get_f1(model, test_dataloader)
+    kappa = get_kappa(fold_model, test_dataloader)
+    f1 = get_f1(fold_model, test_dataloader)
 
-    accuracies.append(accuracy)
+    accuracies.append(best_accuracy)
     thresholds.append(threshold)
     kappas.append(kappa)
     f1s.append(f1)
 
-    torch.save(model.state_dict(), f"./models/fold-{fold + 1}.pt")
-    flush(
-        f"\n\taccuracy: {accuracy}, threshold: {threshold}, f1: {f1}, kappa: {kappas}"
-    )
+    torch.save(fold_model.state_dict(), f"./models/fold-{fold + 1}.pt")
+    flush(f"\n\taccuracy: {accuracy}, threshold: {threshold}, f1: {f1}, kappa: {kappa}")
 
 
 results_df = pd.DataFrame(
-    {"accuracy": accuracies, "threshold": thresholds, "kappa": kappa, "f1": f1s}
+    {"accuracy": accuracies, "threshold": thresholds, "kappa": kappas, "f1": f1s}
 )
 results_df.index.name = "id"
 results_df.to_csv("./data.csv")
