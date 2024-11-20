@@ -76,8 +76,8 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
             scores = torch.cat((batch_scores.flatten(), scores.flatten()))
             flush(scores)
 
-    accuracy = get_accuracy(model, test_dataloader)
     threshold = torch.quantile(scores, 0.95).item()
+    accuracy = get_accuracy(model, test_dataloader)
     roc = get_roc(model, test_dataloader)
     mcc = get_mcc(model, test_dataloader, num_classes)
 
@@ -91,10 +91,7 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
 
 
 results_df = pd.DataFrame(
-    {
-        "accuracy": accuracies,
-        "threshold": thresholds,
-    }
+    {"accuracy": accuracies, "threshold": thresholds, "mcc": mccs, "roc": rocs}
 )
 results_df.index.name = "id"
 results_df.to_csv("./data.csv")
