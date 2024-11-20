@@ -9,8 +9,8 @@ from functions import flush
 from functions import seed
 from metrics import get_accuracy
 from scores import energy_score
-from torchvision.models import resnet18 as resnet
 from losses import LogitNormLoss
+from torchvision.models import resnet18 as resnet
 from sklearn.model_selection import KFold
 
 

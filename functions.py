@@ -7,8 +7,8 @@ from classes import Settings
 
 
 def seed():
-    torch.manual_seed(431890853931963526154)
-    np.random.seed(431890853931963526154)
+    torch.manual_seed(431890)
+    np.random.seed(431890)
 
 
 def get_device():
