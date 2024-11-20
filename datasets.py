@@ -60,10 +60,18 @@ def portraits(filename="portraits.mat"):
     2. The number of unique labels present in the data.
     """
     data = mat73.loadmat(path(f"./datasets/{filename}"))["DATA"]
+    images = data[0]
+    labels = data[1]
+
+    indices = len(labels)
+    np.random.shuffle(indices)
+
+    images = images[indices]
+    labels = labels[indices]
 
     return [
-        ImageDataset(images=data[0], labels=data[1], transform=build_transforms()),
-        len(set(data[1])),
+        ImageDataset(images=images, labels=labels, transform=build_transforms()),
+        len(set(labels)),
     ]
 
 
