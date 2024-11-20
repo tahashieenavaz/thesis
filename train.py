@@ -12,8 +12,8 @@ from torchvision.models import resnet18 as resnet
 from losses import LogitNormLoss
 from sklearn.model_selection import KFold
 
-torch.manual_seed(2092671)
-np.random.seed(2092671)
+torch.manual_seed(431890853931963526154)
+np.random.seed(431890853931963526154)
 
 dataset = portraits()
 device = get_device()
