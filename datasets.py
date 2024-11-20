@@ -27,9 +27,16 @@ class ImageDataset(torch.utils.data.Dataset):
         return image, torch.tensor(label, dtype=torch.long)
 
 
-def portraits(filename="portraits.mat"):
-    data = mat73.loadmat(path(f"./datasets/{filename}"))["DATA"]
-    transform = transforms.Compose(
+def build_transforms():
+    """
+    The `build_transforms` function returns a composition of image transformations including converting
+    to PIL image, resizing, converting to tensor, and normalizing.
+    :return: A `transforms.Compose` object is being returned, which is a sequence of image
+    transformations. The transformations included in the `transforms.Compose` are converting the input
+    image to a PIL Image, resizing it to (224, 224) dimensions, converting it to a PyTorch tensor, and
+    normalizing the image using the specified mean and standard deviation values.
+    """
+    return transforms.Compose(
         [
             transforms.ToPILImage(),
             transforms.Resize((224, 224)),
@@ -38,10 +45,26 @@ def portraits(filename="portraits.mat"):
         ]
     )
 
-    return ImageDataset(images=data[0], labels=data[1], transform=transform)
+
+def portraits(filename="portraits.mat"):
+    """
+    The function `portraits` loads image data from a .mat file and returns an ImageDataset object with
+    the images and labels.
+
+    :param filename: The `filename` parameter is a string that specifies the name of the file containing
+    the portraits data. In this case, the default filename is "portraits.mat", defaults to portraits.mat
+    (optional)
+    :return: The function `portraits` is returning an `ImageDataset` object with images and labels
+    loaded from a MATLAB file named "portraits.mat" located in the "./datasets/" directory. The images
+    are extracted from the first element of the `data` array, and the labels are extracted from the
+    second element of the `data` array. The function also applies transformations to the images using
+    the `build
+    """
+    data = mat73.loadmat(path(f"./datasets/{filename}"))["DATA"]
+    return ImageDataset(images=data[0], labels=data[1], transform=build_transforms())
 
 
-def dataset(as_numpy=False):
+def dummy_classification_dataset(as_numpy=False):
     x, y = make_classification(
         n_samples=1000, n_features=20, n_informative=10, n_redundant=5, n_classes=5
     )

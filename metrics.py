@@ -2,7 +2,7 @@ from functions import get_device
 import torch
 
 
-def get_accuracy(model, test) -> float:
+def get_accuracy(model, dataloader) -> float:
     """
     This function calculates the accuracy of a given model on a test dataset.
 
@@ -15,11 +15,10 @@ def get_accuracy(model, test) -> float:
     calculated as the percentage of correct predictions.
     """
     device = get_device()
-    test_dataloader = torch.utils.data.DataLoader(test, shuffle=False)
     total = 0
     correct = 0
     with torch.inference_mode():
-        for x_batch, y_batch in test_dataloader:
+        for x_batch, y_batch in dataloader:
             x_batch, y_batch = x_batch.to(device), y_batch.to(device)
             outputs = model(x_batch)
             predicted = torch.argmax(outputs, dim=1)
@@ -28,7 +27,7 @@ def get_accuracy(model, test) -> float:
     return correct / total * 100
 
 
-def get_loss(model, test, loss_fn) -> float:
+def get_loss(model, dataloader, loss_fn) -> float:
     """
     This function calculates the cumulative loss of a given model on a test dataset.
 
@@ -38,10 +37,9 @@ def get_loss(model, test, loss_fn) -> float:
     :return: The cumulative loss of the model on the test dataset
     """
     device = get_device()
-    test_dataloader = torch.utils.data.DataLoader(test, shuffle=False)
     cumulative_loss = 0.0
     with torch.inference_mode():
-        for x_batch, y_batch in test_dataloader:
+        for x_batch, y_batch in dataloader:
             x_batch, y_batch = x_batch.to(device), y_batch.to(device)
             outputs = model(x_batch)
             loss = loss_fn(outputs, y_batch)

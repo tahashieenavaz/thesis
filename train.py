@@ -6,21 +6,19 @@ from datasets import portraits
 from functions import get_device
 from functions import load_settings
 from functions import flush
+from functions import seed
 from metrics import get_accuracy
 from scores import energy_score
 from torchvision.models import resnet18 as resnet
 from losses import LogitNormLoss
 from sklearn.model_selection import KFold
 
-torch.manual_seed(431890853931963526154)
-np.random.seed(431890853931963526154)
 
+seed()
 dataset = portraits()
 device = get_device()
 settings = load_settings()
-
 kf = KFold(n_splits=settings.folds)
-
 
 thresholds = []
 accuracies = []
@@ -42,6 +40,7 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
         test, shuffle=False, batch_size=settings.batch_size
     )
 
+    flush(f"fold {fold + 1} was started")
     for epoch in range(settings.epochs):
         train_dataloader = torch.utils.data.DataLoader(
             train, shuffle=True, batch_size=settings.batch_size
@@ -65,8 +64,8 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
         for x_batch, y_batch in test_dataloader:
             x_batch, y_batch = x_batch.to(device), y_batch.to(device)
             logits = model(x_batch)
-            energy = energy_score(logits)
-            scores = torch.cat((energy.flatten(), scores.flatten()))
+            batch_scores = energy_score(logits)
+            scores = torch.cat((batch_scores.flatten(), scores.flatten()))
             flush(scores)
 
     accuracy = get_accuracy(model, test)
