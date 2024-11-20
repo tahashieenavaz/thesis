@@ -9,10 +9,25 @@ from classes import Settings
 
 
 def sha1(text: str):
+    """
+    The function `sha1` takes a string input, encodes it using SHA-1 algorithm, and returns the
+    hexadecimal digest.
+
+    :param text: The `sha1` function you provided takes a string `text` as input and calculates the
+    SHA-1 hash of that text. The `text` parameter is the string for which you want to calculate the
+    SHA-1 hash
+    :type text: str
+    :return: The `sha1` function is returning the SHA-1 hash digest of the input text as a hexadecimal
+    string.
+    """
     return hashlib.sha1(text.encode()).hexdigest()
 
 
 def seed():
+    """
+    The function `seed()` generates a seed value based on a given string and uses it to set the random
+    seed for PyTorch and NumPy.
+    """
     base = "Taha Shieenavaz and Loris Nanni"
     seed_value = int("".join(list(filter(lambda x: str.isdigit(x), sha1(base)))[:8]))
     torch.manual_seed(seed_value)
@@ -132,7 +147,18 @@ def load_settings(**kwargs) -> Settings:
     return Settings(**initial_settings)
 
 
-def build_model(target_classes: int):
+def build_model(num_classes: int):
+    """
+    The function `build_model` creates a ResNet model with a specified number of output classes.
+
+    :param num_classes: The `num_classes` parameter in the `build_model` function represents the number
+    of classes in the classification task for which you want to build a model. This parameter is used to
+    modify the last fully connected layer of the ResNet model to output predictions for the specified
+    number of classes
+    :type num_classes: int
+    :return: The function `build_model` returns a ResNet model with the specified number of output
+    classes.
+    """
     model = resnet(weights="IMAGENET1K_V1").to(get_device())
-    resnet.fc = torch.nn.Linear(model.fc.in_features, target_classes)
+    model.fc = torch.nn.Linear(model.fc.in_features, num_classes)
     return model
