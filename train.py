@@ -42,7 +42,9 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
         list(model.parameters()) + [criterion.temperature],
         settings.lr,
     )
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, gamma=0.1, step_size=10)
+    scheduler = torch.optim.lr_scheduler.StepLR(
+        optimizer, gamma=settings.gamma, step_size=settings.step_size
+    )
 
     test_dataloader = torch.utils.data.DataLoader(
         test, shuffle=False, batch_size=settings.batch_size
@@ -74,7 +76,6 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
             logits = model(x_batch)
             batch_scores = energy_score(logits)
             scores = torch.cat((batch_scores.flatten(), scores.flatten()))
-            flush(scores)
 
     threshold = torch.quantile(scores, 0.95).item()
     accuracy = get_accuracy(model, test_dataloader)
