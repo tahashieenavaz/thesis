@@ -7,6 +7,17 @@ from sklearn.metrics import f1_score
 
 
 def get_accuracy(model, dataloader) -> float:
+    """
+    The function `get_accuracy` calculates the accuracy of a model on a given dataset using PyTorch.
+
+    :param model: A neural network model that has been trained for a specific task, such as image
+    classification or natural language processing
+    :param dataloader: A dataloader is an iterable object that allows you to efficiently load and
+    iterate over your dataset in batches. It is commonly used in machine learning frameworks like
+    PyTorch to feed data to the model during training or evaluation
+    :return: The function `get_accuracy` returns the accuracy of the model on the given dataloader as a
+    percentage.
+    """
     model.eval()
     device = get_device()
     total = 0
@@ -15,46 +26,10 @@ def get_accuracy(model, dataloader) -> float:
         for x_batch, y_batch in dataloader:
             x_batch, y_batch = x_batch.to(device), y_batch.to(device)
             outputs = model(x_batch)
-
-            print("Model output shape:", outputs.shape)  # Debug output
-            _, predicted = torch.max(outputs, 1)
-            print("Predicted:", predicted[:10])
-            print("True labels:", y_batch[:10])
-
+            predicted = torch.argmax(outputs, dim=1)
             total += y_batch.size(0)
             correct += (predicted == y_batch).sum().item()
-
-            print(
-                f"Batch accuracy: {(predicted == y_batch).sum().item() / y_batch.size(0) * 100:.2f}%"
-            )
-
-    print(f"Total: {total}, Correct: {correct}")
     return correct / total * 100
-
-
-# def get_accuracy(model, dataloader) -> float:
-#     """
-#     This function calculates the accuracy of a given model on a test dataset.
-
-#     :param model: A machine learning model that you have trained for a specific task, such as image
-#     classification or sentiment analysis
-#     :param test: The `test` parameter in the `get_accuracy` function is typically a dataset containing
-#     test samples and their corresponding labels. It is used to evaluate the accuracy of the `model` on
-#     this test dataset
-#     :return: The function `get_accuracy` returns the accuracy of a given model on a test dataset,
-#     calculated as the percentage of correct predictions.
-#     """
-#     device = get_device()
-#     total = 0
-#     correct = 0
-#     with torch.inference_mode():
-#         for x_batch, y_batch in dataloader:
-#             x_batch, y_batch = x_batch.to(device), y_batch.to(device)
-#             outputs = model(x_batch)
-#             _, predicted = torch.max(outputs, 1)
-#             total += y_batch.size(0)
-#             correct += (predicted == y_batch).sum().item()
-#     return correct / total * 100
 
 
 def get_loss(model, dataloader, loss_fn) -> float:

@@ -160,5 +160,5 @@ def build_model(num_classes: int):
     classes.
     """
     model = resnet(weights="IMAGENET1K_V1").to(get_device())
-    model.fc = torch.nn.Linear(model.fc.in_features, num_classes)
+    model.fc = torch.nn.Linear(model.fc.in_features, num_classes).to(get_device())
     return model
