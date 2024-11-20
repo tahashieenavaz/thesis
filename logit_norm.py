@@ -71,8 +71,10 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
 
     accuracy = get_accuracy(model, test)
     accuracies.append(accuracy)
+
     threshold = torch.quantile(scores, 0.95)
-    thresholds.append(threshold)
+    thresholds.append(threshold.item())
+
     torch.save(model.state_dict(), f"./fold-{fold + 1}.pt")
 
 pd.DataFrame({"accuracy": accuracies, "threshold": thresholds}).to_csv("./data.csv")
