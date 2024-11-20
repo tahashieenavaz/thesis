@@ -9,8 +9,8 @@ from functions import flush
 from functions import seed
 from functions import create_folder
 from metrics import get_accuracy
-from metrics import get_roc
-from metrics import get_mcc
+from metrics import get_kappa
+from metrics import get_f1
 from scores import energy_score
 from losses import LogitNormLoss
 from torchvision.models import resnet18 as resnet
@@ -26,7 +26,8 @@ create_folder("./models")
 
 thresholds = []
 accuracies = []
-mccs = []
+f1s = []
+kappas = []
 
 
 flush(f"The dataset has {num_classes} classes")
@@ -80,18 +81,20 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
 
     threshold = torch.quantile(scores, 0.95).item()
     accuracy = get_accuracy(model, test_dataloader)
-    mcc = get_mcc(model, test_dataloader, num_classes)
+    kappa = get_kappa(model, test_dataloader)
+    f1 = get_f1(model, test_dataloader)
 
     accuracies.append(accuracy)
     thresholds.append(threshold)
-    mccs.append(mcc)
+    kappas.append(kappa)
+    f1s.append(f1)
 
     torch.save(model.state_dict(), f"./models/fold-{fold + 1}.pt")
-    flush(f"\n\taccuracy: {accuracy}, threshold: {threshold}, mcc: {mcc}")
+    flush(f"\n\taccuracy: {accuracy}, threshold: {threshold}, f1: {f1}, kappa: {kappa}")
 
 
 results_df = pd.DataFrame(
-    {"accuracy": accuracies, "threshold": thresholds, "mcc": mccs}
+    {"accuracy": accuracies, "threshold": thresholds, "kappa": kappa, "f1": f1s}
 )
 results_df.index.name = "id"
 results_df.to_csv("./data.csv")
