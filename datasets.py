@@ -25,7 +25,7 @@ class ImageDataset(torch.utils.data.Dataset):
         if self.transform:
             image = self.transform(image)
 
-        return image, torch.tensor(label - 1, dtype=torch.long)
+        return image, torch.tensor(label, dtype=torch.long)
 
 
 def build_transforms():
@@ -62,7 +62,7 @@ def portraits(filename="portraits.mat"):
     """
     data = mat73.loadmat(path(f"./datasets/{filename}"))["DATA"]
     images = data[0]
-    labels = data[1]
+    labels = list(map(lambda x: x - 1, data[1]))
 
     indices = list(range(len(labels)))
     random.shuffle(indices)

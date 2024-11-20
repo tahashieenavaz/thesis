@@ -36,7 +36,7 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
     train = torch.utils.data.Subset(dataset, train_idx)
     test = torch.utils.data.Subset(dataset, test_idx)
 
-    model = build_model()
+    model = build_model(num_classes)
     criterion = LogitNormLoss()
     cnn_params = [
         param for name, param in model.named_parameters() if not name.startswith("fc")
