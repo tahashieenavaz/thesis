@@ -48,6 +48,7 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
         [
             {"params": cnn_params, "lr": settings.lr},
             {"params": fc_params, "lr": settings.lr * 20},
+            {"params": [criterion.temperature], "lr": settings.lr},
         ],
         momentum=0.9,
     )
