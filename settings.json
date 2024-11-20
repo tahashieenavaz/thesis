@@ -1,6 +1,6 @@
 {
   "epochs": 50,
-  "lr": 0.1,
+  "lr": 0.01,
   "batch_size": 64,
   "folds": 5,
   "gamma": 0.1,

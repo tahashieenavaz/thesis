@@ -8,12 +8,12 @@ from functions import load_settings
 from functions import flush
 from functions import seed
 from functions import create_folder
+from functions import build_model
 from metrics import get_accuracy
 from metrics import get_kappa
 from metrics import get_f1
 from scores import energy_score
 from losses import LogitNormLoss
-from torchvision.models import resnet18 as resnet
 from sklearn.model_selection import KFold
 
 
@@ -36,13 +36,20 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
     train = torch.utils.data.Subset(dataset, train_idx)
     test = torch.utils.data.Subset(dataset, test_idx)
 
-    model = resnet().to(device)
-    resnet.fc = torch.nn.Linear(model.fc.in_features, num_classes)
-
+    model = build_model()
     criterion = LogitNormLoss()
-    optimizer = torch.optim.Adam(
-        list(model.parameters()) + [criterion.temperature],
-        settings.lr,
+    cnn_params = [
+        param for name, param in model.named_parameters() if not name.startswith("fc")
+    ]
+    fc_params = [
+        param for name, param in model.named_parameters() if name.startswith("fc")
+    ]
+    optimizer = torch.optim.SGD(
+        [
+            {"params": cnn_params, "lr": settings.lr},
+            {"params": fc_params, "lr": settings.lr * 20},
+        ],
+        momentum=0.9,
     )
     scheduler = torch.optim.lr_scheduler.StepLR(
         optimizer, gamma=settings.gamma, step_size=settings.step_size
@@ -59,20 +66,22 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
         )
 
         model.train()
+        epoch_loss = 0
         for x_batch, y_batch in train_dataloader:
             x_batch, y_batch = x_batch.to(device), y_batch.to(device)
             optimizer.zero_grad()
             loss = criterion(model(x_batch), y_batch)
             loss.backward()
             optimizer.step()
+            epoch_loss += loss.item()
         scheduler.step()
-        flush(f"\tepoch {epoch + 1} was finished")
+        flush(f"\tepoch {epoch + 1} was finished with {epoch_loss}")
     # epochs end
     flush(f"fold {fold + 1} was finished")
 
     scores = torch.tensor([], device=device)
+    model.eval()
     with torch.inference_mode():
-        model.eval()
         for x_batch, y_batch in test_dataloader:
             x_batch, y_batch = x_batch.to(device), y_batch.to(device)
             logits = model(x_batch)

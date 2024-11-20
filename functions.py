@@ -1,14 +1,22 @@
 import torch
 import json
 import numpy as np
+import hashlib
 import os
 
+from torchvision.models import resnet50 as resnet
 from classes import Settings
 
 
+def sha1(text: str):
+    return hashlib.sha1(text.encode()).hexdigest()
+
+
 def seed():
-    torch.manual_seed(431890)
-    np.random.seed(431890)
+    base = "Taha Shieenavaz and Loris Nanni"
+    seed_value = int("".join(list(filter(lambda x: str.isdigit(x), sha1(base)))[:8]))
+    torch.manual_seed(seed_value)
+    np.random.seed(seed_value)
 
 
 def create_folder(folder_path: str) -> None:
@@ -122,3 +130,9 @@ def load_settings(**kwargs) -> Settings:
         initial_settings[key] = value
 
     return Settings(**initial_settings)
+
+
+def build_model(target_classes: int):
+    model = resnet(weights="IMAGENET1K_V1").to(get_device())
+    resnet.fc = torch.nn.Linear(model.fc.in_features, target_classes)
+    return model
