@@ -13,6 +13,7 @@ from metrics import get_accuracy
 from metrics import get_kappa
 from metrics import get_f1
 from scores import energy_score
+from scores import get_scores
 from losses import LogitNormLoss
 from sklearn.model_selection import KFold
 
@@ -80,16 +81,7 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
     # epochs end
     flush(f"fold {fold + 1} was finished")
 
-    scores = torch.tensor([], device=device)
-    model.eval()
-    with torch.inference_mode():
-        for x_batch, y_batch in test_dataloader:
-            x_batch, y_batch = x_batch.to(device), y_batch.to(device)
-            logits = model(x_batch)
-            batch_scores = energy_score(logits)
-            scores = torch.cat((batch_scores.flatten(), scores.flatten()))
-
-    threshold = torch.quantile(scores, 0.95).item()
+    threshold = torch.quantile(get_scores(model, energy_score), 0.95).item()
     accuracy = get_accuracy(model, test_dataloader)
     kappa = get_kappa(model, test_dataloader)
     f1 = get_f1(model, test_dataloader)
