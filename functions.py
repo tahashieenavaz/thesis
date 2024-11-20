@@ -11,6 +11,20 @@ def seed():
     np.random.seed(431890)
 
 
+def create_folder(folder_path: str) -> None:
+    """
+    The function `create_folder` creates a new folder at the specified path if it does not already
+    exist.
+
+    :param folder_path: The `folder_path` parameter in the `create_folder` function is a string that
+    represents the path of the folder that you want to create. This function checks if the folder
+    already exists, and if it doesn't, it creates the folder at the specified path
+    :type folder_path: str
+    """
+    if not os.path.exists(path(folder_path)):
+        os.makedirs(folder_path)
+
+
 def get_device():
     """
     The function `get_device()` returns the appropriate device (CUDA or CPU) based on the availability

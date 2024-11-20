@@ -7,6 +7,7 @@ from functions import get_device
 from functions import load_settings
 from functions import flush
 from functions import seed
+from functions import create_folder
 from metrics import get_accuracy
 from scores import energy_score
 from losses import LogitNormLoss
@@ -22,6 +23,7 @@ kf = KFold(n_splits=settings.folds)
 
 thresholds = []
 accuracies = []
+create_folder("./models")
 
 for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
     train = torch.utils.data.Subset(dataset, train_idx)
@@ -74,6 +76,9 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
     threshold = torch.quantile(scores, 0.95)
     thresholds.append(threshold.item())
 
-    torch.save(model.state_dict(), f"./fold-{fold + 1}.pt")
+    torch.save(model.state_dict(), f"./models/fold-{fold + 1}.pt")
 
-pd.DataFrame({"accuracy": accuracies, "threshold": thresholds}).to_csv("./data.csv")
+
+results_df = pd.DataFrame({"accuracy": accuracies, "threshold": thresholds})
+results_df.index.name = "id"
+results_df.to_csv("./data.csv")
