@@ -1,6 +1,6 @@
-# Margin-Enhanced LogitNorm Loss
+# Margin-Enhanced Logit Normalization Loss
 
-- [Margin-Enhanced LogitNorm Loss](#margin-enhanced-logitnorm-loss)
+- [Margin-Enhanced Logit Normalization Loss](#margin-enhanced-logit-normalization-loss)
   - [Introduction](#introduction)
   - [Approach](#approach)
     - [Python](#python)
