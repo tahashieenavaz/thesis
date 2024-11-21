@@ -73,7 +73,9 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
             fold_model = deepcopy(model)
             best_accuracy = accuracy
 
-        flush(f"\tepoch {epoch + 1} was finished with {epoch_loss}")
+        flush(
+            f"\tepoch {epoch + 1} was finished with loss: {epoch_loss}, accuracy: {accuracy}"
+        )
 
         if step(epoch):
             for group in optimizer.param_groups:
