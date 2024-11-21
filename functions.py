@@ -177,4 +177,5 @@ def build_optimizer(model, criterion, lr: float):
             {"params": fc_params, "lr": lr * 20},
             {"params": [criterion.temperature, criterion.margin], "lr": lr},
         ],
+        momentum=0.9,
     )
