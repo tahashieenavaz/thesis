@@ -31,11 +31,16 @@ thresholds = []
 accuracies = []
 f1s = []
 kappas = []
+temperatures = []
+margins = []
 
 
 flush(f"The dataset has {num_classes} classes")
 
 for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
+    fold_model = None
+    best_accuracy = float("-inf")
+
     train = torch.utils.data.Subset(dataset, train_idx)
     test = torch.utils.data.Subset(dataset, test_idx)
     test_dataloader = torch.utils.data.DataLoader(
@@ -44,14 +49,12 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
 
     model = build_model(num_classes)
 
-    fold_model = None
-    best_accuracy = float("-inf")
-
     criterion = MarginEnhancedLogitNormLoss()
     optimizer = build_optimizer(model=model, criterion=criterion, lr=settings.lr)
     scheduler = torch.optim.lr_scheduler.StepLR(
         optimizer, gamma=settings.gamma, step_size=settings.step_size
     )
+
     flush(f"fold {fold + 1} was started")
     for epoch in range(settings.epochs):
         train_dataloader = torch.utils.data.DataLoader(
@@ -87,6 +90,8 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
     thresholds.append(threshold)
     kappas.append(kappa)
     f1s.append(f1)
+    temperatures.append(criterion.temperature.item())
+    margins.append(criterion.margin.item())
 
     torch.save(fold_model.state_dict(), f"./models/fold-{fold + 1}.pt")
     flush(
@@ -95,7 +100,14 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
 
 
 results_df = pd.DataFrame(
-    {"accuracy": accuracies, "threshold": thresholds, "kappa": kappas, "f1": f1s}
+    {
+        "accuracy": accuracies,
+        "threshold": thresholds,
+        "kappa": kappas,
+        "f1": f1s,
+        "margin": margins,
+        "temperature": temperatures,
+    }
 )
 results_df.index.name = "id"
 results_df.to_csv("./data.csv")
