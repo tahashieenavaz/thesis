@@ -171,7 +171,7 @@ def build_optimizer(model, criterion, lr: float):
     fc_params = [
         param for name, param in model.named_parameters() if name.startswith("fc")
     ]
-    return torch.optim.Adam(
+    return torch.optim.SGD(
         [
             {"params": cnn_params, "lr": lr},
             {"params": fc_params, "lr": lr * 20},
