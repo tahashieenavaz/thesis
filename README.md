@@ -3,7 +3,7 @@
 - [Margin-Enhanced LogitNorm Loss](#margin-enhanced-logitnorm-loss)
   - [Introduction](#introduction)
   - [Approach](#approach)
-    - [Python Implementation](#python-implementation)
+    - [Code](#code)
   - [References](#references)
 
 ## Introduction
@@ -26,7 +26,7 @@ The logits are normalized by subtracting a learnable margin parameter ($m$) and 
 
 The final step involves applying the cross-entropy loss function on these margin-enhanced, temperature-scaled normalized logits and the target labels, promoting discriminative representations while maintaining the desired separation in the feature space.
 
-### Python Implementation
+### Code
 
 ```python
 class MarginEnhancedLogitNormLoss(torch.nn.Module):
@@ -44,6 +44,40 @@ class MarginEnhancedLogitNormLoss(torch.nn.Module):
         norms = torch.norm(x, p=2, dim=-1, keepdim=True) + pow(10, -7)
         logit_norm = torch.div(x - self.margin, norms) / self.temperature
         return torch.nn.functional.cross_entropy(logit_norm, target)
+```
+
+```matlab
+classdef MarginEnhancedLogitNormLoss < handle
+    properties
+        temperature
+        margin
+    end
+
+    methods
+        % Constructor
+        function obj = MarginEnhancedLogitNormLoss(initial_temperature, initial_margin)
+            if nargin > 0
+                obj.temperature = initial_temperature;
+                obj.margin = initial_margin;
+            else
+                obj.temperature = 1.0;  % Default value
+                obj.margin = 0.1;       % Default value
+            end
+        end
+
+        function loss = forward(obj, x, target)
+            norms = sqrt(sum(x.^2, 2)) + 1e-7;  % Adding epsilon for stability
+            logit_norm = (x - obj.margin) ./ norms / obj.temperature;
+            loss = obj.cross_entropy(logit_norm, target);
+        end
+
+        function loss = cross_entropy(~, logit_norm, target)
+            logits = exp(logit_norm);
+            softmax_output = logits ./ sum(logits, 2);
+            loss = -mean(log(target) .* softmax_output, 2);
+        end
+    end
+end
 ```
 
 ## References
