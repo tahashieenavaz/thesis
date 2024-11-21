@@ -85,19 +85,19 @@ end
 
 ## Dataset
 
-<div style="text-align: center;">
+<div align="center">
   <img src="art/dataset-image-1.jpg" width="200" />
   <img src="art/dataset-image-2.jpg" width="200" />
   <img src="art/dataset-image-3.jpg" width="200" />
 </div>
 
-<div style="text-align: center;">
+<div align="center">
   <img src="art/dataset-image-4.jpg" width="200" />
   <img src="art/dataset-image-5.jpg" width="200" />
   <img src="art/dataset-image-6.jpg" width="200" />
 </div>
 
-<div style="text-align: center;">
+<div align="center">
   <img src="art/dataset-image-7.jpg" width="200" />
   <img src="art/dataset-image-8.jpg" width="200" />
   <img src="art/dataset-image-9.jpg" width="200" />
