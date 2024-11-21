@@ -1,9 +1,14 @@
 {
   "epochs": 50,
+
+  // following is used to train CNN and FC layers
   "lr": 0.1,
+
+  // following learning rate is used to train the loss function parameters
+  "theta": 0.01,
+
   "batch_size": 32,
   "folds": 5,
   "gamma": 0.1,
-  "step_size": 10,
-  "theta": 0.01
+  "step_size": 10
 }
