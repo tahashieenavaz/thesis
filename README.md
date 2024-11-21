@@ -86,10 +86,10 @@ end
 
 ## Dataset
 
-The dataset used for this research training was the portraits dataset provided by [Dr. Nanni](https://scholar.google.it/citations?user=5NSGzcQAAAAJ&hl=en) to make sure the comparison between already implemented approaches and new ideas is solid since he could instantly compare newly achieved performance metrics with the prior.
+The dataset used for this research training was the portraits dataset provided by [Dr. Nanni](https://scholar.google.it/citations?user=5NSGzcQAAAAJ&hl=en) to make sure the comparison between already implemented approaches and the new ideas is solid since he could instantly compare newly achieved performance metrics with the prior.
 
 <div align="center">
-    <img src="art/dists.png" width="400" />
+    <img src="art/distribution.png" width="400" />
 </div>
 
 It is comprised of 927 images divided into six different categories with the distribution shown in the figure.
