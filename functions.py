@@ -175,9 +175,9 @@ def build_optimizer(model, criterion, lr: float = 0.1, theta: float = 0.01):
 
     optimizer = torch.optim.SGD(
         [
-            {"params": cnn_params, "lr": lr},
-            {"params": fc_params, "lr": lr * 20},
-            {"params": criterion_params, "lr": theta},
+            {"params": cnn_params, "lr": lr, "name": "cnn"},
+            {"params": fc_params, "lr": lr * 20, "name": "fc"},
+            {"params": criterion_params, "lr": theta, "name": "criterion"},
         ],
         momentum=0.9,
     )
@@ -187,11 +187,11 @@ def build_optimizer(model, criterion, lr: float = 0.1, theta: float = 0.01):
             return False
 
         for param_group in optimizer.param_groups:
-            if param_group["params"] == list(cnn_params):
+            if param_group["name"] == "cnn":
                 param_group["lr"] = param_group["lr"] * 0.1
-            elif param_group["params"] == list(fc_params):
+            elif param_group["name"] == "fc":
                 param_group["lr"] = param_group["lr"] * 0.1
-            elif param_group["params"] == list(criterion_params):
+            elif param_group["name"] == "criterion":
                 param_group["lr"] = param_group["lr"] * 0.8
 
         return True
