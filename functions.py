@@ -182,7 +182,7 @@ def build_optimizer(model, criterion, lr: float = 0.1, theta: float = 0.01):
         momentum=0.9,
     )
 
-    def step(epoch: int) -> bool:
+    def step(epoch: int, verbose: bool = False) -> bool:
         if (epoch + 1) % 10 != 0:
             return False
 
@@ -193,6 +193,10 @@ def build_optimizer(model, criterion, lr: float = 0.1, theta: float = 0.01):
                 param_group["lr"] = param_group["lr"] * 0.1
             elif param_group["name"] == "criterion":
                 param_group["lr"] = param_group["lr"] * 0.8
+
+        if verbose:
+            for param_group in optimizer.param_groups:
+                flush(f"\tgroup: {param_group['name']} lr: {param_group['lr']}")
 
         return True
 

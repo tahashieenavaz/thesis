@@ -77,9 +77,7 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
             f"\tepoch {epoch + 1} was finished with loss: {epoch_loss}, accuracy: {accuracy}"
         )
 
-        if step(epoch):
-            for group in optimizer.param_groups:
-                flush(f"group: {group["name"]} lr: {group["lr"]}")
+        step(epoch, verbose=False)
     # epochs end
     flush(f"fold {fold + 1} was finished")
 
