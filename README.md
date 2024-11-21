@@ -18,6 +18,8 @@ From an academic standpoint, OOD detection also addresses broader challenges in 
 \frac{(x - M) * T}{|x| + 10^7}
 ```
 
+<br /><br />
+
 The MarginEnhanced LogitNorm Loss is mathematically implemented by first computing the Euclidean norm ($L^2$ Norm) of the input vectors $x$, denoted as $\left\| x \right\|_2$, and ensuring numerical stability by adding a small constant ($10^7$).
 
 The logits are normalized by subtracting a learnable margin parameter ($m$) and dividing the result by the norm. This operation enhances the decision boundary by introducing a margin between the logits. The normalized logits are then scaled by a learnable temperature parameter ($T$) to control the sharpness of the logits.
