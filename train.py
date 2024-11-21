@@ -38,6 +38,9 @@ flush(f"The dataset has {num_classes} classes")
 for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
     train = torch.utils.data.Subset(dataset, train_idx)
     test = torch.utils.data.Subset(dataset, test_idx)
+    test_dataloader = torch.utils.data.DataLoader(
+        test, shuffle=False, batch_size=settings.batch_size
+    )
 
     model = build_model(num_classes)
 
@@ -48,9 +51,6 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
     optimizer = build_optimizer(model=model, criterion=criterion, lr=settings.lr)
     scheduler = torch.optim.lr_scheduler.StepLR(
         optimizer, gamma=settings.gamma, step_size=settings.step_size
-    )
-    test_dataloader = torch.utils.data.DataLoader(
-        test, shuffle=False, batch_size=settings.batch_size
     )
     flush(f"fold {fold + 1} was started")
     for epoch in range(settings.epochs):
