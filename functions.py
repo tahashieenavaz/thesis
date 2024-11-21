@@ -182,14 +182,18 @@ def build_optimizer(model, criterion, lr: float = 0.1, theta: float = 0.01):
         momentum=0.9,
     )
 
-    def step(epoch: int):
-        if (epoch + 1) % 10 == 0:
-            for param_group in optimizer.param_groups:
-                if param_group["params"] == list(cnn_params):
-                    param_group["lr"] = param_group["lr"] * 0.1
-                elif param_group["params"] == list(fc_params):
-                    param_group["lr"] = param_group["lr"] * 0.1
-                elif param_group["params"] == list(criterion_params):
-                    param_group["lr"] = param_group["lr"] * 0.8
+    def step(epoch: int) -> bool:
+        if (epoch + 1) % 10 != 0:
+            return False
+
+        for param_group in optimizer.param_groups:
+            if param_group["params"] == list(cnn_params):
+                param_group["lr"] = param_group["lr"] * 0.1
+            elif param_group["params"] == list(fc_params):
+                param_group["lr"] = param_group["lr"] * 0.1
+            elif param_group["params"] == list(criterion_params):
+                param_group["lr"] = param_group["lr"] * 0.8
+
+        return True
 
     return [optimizer, step]
