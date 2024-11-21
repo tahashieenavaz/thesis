@@ -15,7 +15,7 @@ From an academic standpoint, OOD detection also addresses broader challenges in 
 ## Approach
 
 ```math
-\frac{x - M}{|x|}
+\frac{(x - M) * T}{|x|}
 ```
 
 The MarginEnhanced LogitNorm Loss is mathematically implemented by first computing the Euclidean norm ($L^2$ Norm) of the input vectors $x$, denoted as $\left\| x \right\|_2$, and ensuring numerical stability by adding a small constant ($10^7$).
