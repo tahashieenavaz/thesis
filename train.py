@@ -8,7 +8,7 @@ from functions import load_settings
 from functions import flush
 from functions import seed
 from functions import create_folder
-from functions import build_model
+from functions import build_resnet
 from functions import build_optimizer
 from metrics import get_accuracy
 from metrics import get_kappa
@@ -47,9 +47,8 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
         test, shuffle=False, batch_size=settings.batch_size
     )
 
-    model = build_model(num_classes)
-
     criterion = MarginEnhancedLogitNormLoss()
+    model = build_resnet(num_classes)
     optimizer, step = build_optimizer(
         model=model, criterion=criterion, lr=settings.lr, theta=settings.theta
     )

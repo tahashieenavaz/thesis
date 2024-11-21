@@ -147,17 +147,17 @@ def load_settings(**kwargs) -> Settings:
     return Settings(**initial_settings)
 
 
-def build_model(num_classes: int):
+def build_resnet(num_classes: int):
     """
-    The function `build_model` creates a ResNet model with a specified number of output classes.
+    The function `build_resnet` constructs a ResNet model with a specified number of output classes by
+    modifying the fully connected layer.
 
-    :param num_classes: The `num_classes` parameter in the `build_model` function represents the number
-    of classes in the classification task for which you want to build a model. This parameter is used to
-    modify the last fully connected layer of the ResNet model to output predictions for the specified
-    number of classes
+    :param num_classes: The `num_classes` parameter in the `build_resnet` function represents the number
+    of classes in the classification task for which you are building the ResNet model. This parameter is
+    used to define the number of output units in the final fully connected layer of the ResNet model
     :type num_classes: int
-    :return: The function `build_model` returns a ResNet model with the specified number of output
-    classes.
+    :return: The function `build_resnet` returns a ResNet model with a modified fully connected layer to
+    output the specified number of classes.
     """
     model = resnet(weights="IMAGENET1K_V1").to(get_device())
     model.fc = torch.nn.Linear(model.fc.in_features, num_classes).to(get_device())
