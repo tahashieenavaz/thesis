@@ -1,7 +1,7 @@
 {
   "epochs": 50,
-  "lr": 0.1,
-  "theta": 0.01,
+  "lr": 0.01,
+  "theta": 0.001,
   "batch_size": 32,
   "folds": 5,
   "gamma": 0.1,
