@@ -15,7 +15,7 @@ From an academic standpoint, OOD detection also addresses broader challenges in 
 ## Approach
 
 ```math
-L_{MELN} = \frac{(x - M) * T}{|x| + \epsilon}
+L_{MELN} = L_{CE}[\frac{(x - M) * T}{|x| + \epsilon}]
 ```
 
 <br />
