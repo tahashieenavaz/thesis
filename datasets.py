@@ -4,9 +4,8 @@ import mat73
 import random
 
 from functions import path
-from sklearn.datasets import make_classification
-from sklearn.model_selection import train_test_split
 from torchvision import transforms
+from torchvision.datasets import CIFAR10
 
 
 class ImageDataset(torch.utils.data.Dataset):
@@ -28,7 +27,7 @@ class ImageDataset(torch.utils.data.Dataset):
         return image, torch.tensor(label, dtype=torch.long)
 
 
-def build_transforms():
+def build_transforms(convert_to_image: bool = True):
     """
     The `build_transforms` function returns a composition of image transformations including converting
     to PIL image, resizing, converting to tensor, and normalizing.
@@ -37,14 +36,18 @@ def build_transforms():
     image to a PIL Image, resizing it to (224, 224) dimensions, converting it to a PyTorch tensor, and
     normalizing the image using the specified mean and standard deviation values.
     """
-    return transforms.Compose(
-        [
-            transforms.ToPILImage(),
-            transforms.Resize((224, 224)),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-        ]
-    )
+    transforms_list = []
+
+    if convert_to_image:
+        transforms_list.append(transforms.ToPILImage())
+
+    transforms_list += [
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    ]
+
+    return transforms.Compose(transforms_list)
 
 
 def portraits(filename="portraits.mat"):
@@ -76,3 +79,14 @@ def portraits(filename="portraits.mat"):
         ),
         len(set(labels)),
     ]
+
+
+def cifar10():
+    train = CIFAR10(
+        root="./data", train=True, download=True, transform=build_transforms(False)
+    )
+    test = CIFAR10(
+        root="./data", train=False, download=True, transform=build_transforms(False)
+    )
+    dataset = torch.utils.data.ConcatDataset([train, test])
+    return [dataset, 10]

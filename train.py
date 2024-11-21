@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 
 from datasets import portraits
+from datasets import cifar10
 from functions import get_device
 from functions import load_settings
 from functions import flush
@@ -21,7 +22,7 @@ from copy import deepcopy
 
 
 seed()
-dataset, num_classes = portraits()
+dataset, num_classes = cifar10()
 device = get_device()
 settings = load_settings()
 kf = KFold(n_splits=settings.folds)
