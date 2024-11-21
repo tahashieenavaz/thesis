@@ -164,18 +164,32 @@ def build_model(num_classes: int):
     return model
 
 
-def build_optimizer(model, criterion, lr: float):
+def build_optimizer(model, criterion, lr: float = 0.1, theta: float = 0.01):
     cnn_params = [
         param for name, param in model.named_parameters() if not name.startswith("fc")
     ]
     fc_params = [
         param for name, param in model.named_parameters() if name.startswith("fc")
     ]
-    return torch.optim.SGD(
+    criterion_params = [criterion.temperature, criterion.margin]
+
+    optimizer = torch.optim.SGD(
         [
             {"params": cnn_params, "lr": lr},
             {"params": fc_params, "lr": lr * 20},
-            {"params": [criterion.temperature, criterion.margin], "lr": lr},
+            {"params": criterion_params, "lr": theta},
         ],
         momentum=0.9,
     )
+
+    def step(epoch: int):
+        if (epoch + 1) % 10 == 0:
+            for param_group in optimizer.param_groups:
+                if param_group["params"] == list(cnn_params):
+                    param_group["lr"] = param_group["lr"] * 0.1
+                elif param_group["params"] == list(fc_params):
+                    param_group["lr"] = param_group["lr"] * 0.1
+                elif param_group["params"] == list(criterion_params):
+                    param_group["lr"] = param_group["lr"] * 0.8
+
+    return [optimizer, step]

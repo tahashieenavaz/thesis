@@ -50,9 +50,8 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
     model = build_model(num_classes)
 
     criterion = MarginEnhancedLogitNormLoss()
-    optimizer = build_optimizer(model=model, criterion=criterion, lr=settings.lr)
-    scheduler = torch.optim.lr_scheduler.StepLR(
-        optimizer, gamma=settings.gamma, step_size=settings.step_size
+    optimizer, step = build_optimizer(
+        model=model, criterion=criterion, lr=settings.lr, theta=settings.theta
     )
 
     flush(f"fold {fold + 1} was started")
@@ -69,7 +68,7 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
             loss.backward()
             optimizer.step()
             epoch_loss += loss.item()
-        scheduler.step()
+        step(epoch)
 
         accuracy = get_accuracy(model, test_dataloader)
         if accuracy > best_accuracy:
