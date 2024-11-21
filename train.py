@@ -68,16 +68,16 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
             optimizer.step()
             epoch_loss += loss.item()
 
-        if step(epoch):
-            for group in optimizer.param_groups:
-                flush(f"group: {group["name"]} lr: {group["lr"]}")
-
         accuracy = get_accuracy(model, test_dataloader)
         if accuracy > best_accuracy:
             fold_model = deepcopy(model)
             best_accuracy = accuracy
 
         flush(f"\tepoch {epoch + 1} was finished with {epoch_loss}")
+
+        if step(epoch):
+            for group in optimizer.param_groups:
+                flush(f"group: {group["name"]} lr: {group["lr"]}")
     # epochs end
     flush(f"fold {fold + 1} was finished")
 
