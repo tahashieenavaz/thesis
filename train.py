@@ -9,6 +9,7 @@ from functions import flush
 from functions import seed
 from functions import create_folder
 from functions import build_model
+from functions import build_optimizer
 from metrics import get_accuracy
 from metrics import get_kappa
 from metrics import get_f1
@@ -44,19 +45,7 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
     best_accuracy = float("-inf")
 
     criterion = MarginEnhancedLogitNormLoss()
-    cnn_params = [
-        param for name, param in model.named_parameters() if not name.startswith("fc")
-    ]
-    fc_params = [
-        param for name, param in model.named_parameters() if name.startswith("fc")
-    ]
-    optimizer = torch.optim.Adam(
-        [
-            {"params": cnn_params, "lr": settings.lr},
-            {"params": fc_params, "lr": settings.lr * 20},
-            {"params": [criterion.temperature, criterion.margin], "lr": settings.lr},
-        ],
-    )
+    optimizer = build_optimizer(model=model, criterion=criterion, lr=settings.lr)
     scheduler = torch.optim.lr_scheduler.StepLR(
         optimizer, gamma=settings.gamma, step_size=settings.step_size
     )

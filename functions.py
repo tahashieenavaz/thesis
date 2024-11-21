@@ -162,3 +162,19 @@ def build_model(num_classes: int):
     model = resnet(weights="IMAGENET1K_V1").to(get_device())
     model.fc = torch.nn.Linear(model.fc.in_features, num_classes).to(get_device())
     return model
+
+
+def build_optimizer(model, criterion, lr: float):
+    cnn_params = [
+        param for name, param in model.named_parameters() if not name.startswith("fc")
+    ]
+    fc_params = [
+        param for name, param in model.named_parameters() if name.startswith("fc")
+    ]
+    return torch.optim.Adam(
+        [
+            {"params": cnn_params, "lr": lr},
+            {"params": fc_params, "lr": lr * 20},
+            {"params": [criterion.temperature, criterion.margin], "lr": lr},
+        ],
+    )
