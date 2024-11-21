@@ -14,7 +14,7 @@ From an academic standpoint, OOD detection also addresses broader challenges in 
 ### Loss
 
 ```python
-class LogitNormLoss(torch.nn.Module):
+class MarginEnhancedLogitNormLoss(torch.nn.Module):
     def __init__(self, temperature: float = 1.0, margin: float = 0.1):
         super(LogitNormLoss, self).__init__()
         self.device = get_device()
