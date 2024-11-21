@@ -67,7 +67,10 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
             loss.backward()
             optimizer.step()
             epoch_loss += loss.item()
-        step(epoch)
+
+        if step(epoch):
+            for group in optimizer.param_groups:
+                flush(f"group: {group["name"]} lr: {group["lr"]}")
 
         accuracy = get_accuracy(model, test_dataloader)
         if accuracy > best_accuracy:
