@@ -3,7 +3,8 @@
 - [Margin-Enhanced LogitNorm Loss](#margin-enhanced-logitnorm-loss)
   - [Introduction](#introduction)
   - [Approach](#approach)
-    - [Code](#code)
+    - [Python](#python)
+    - [Matlab](#matlab)
   - [References](#references)
 
 ## Introduction
@@ -26,7 +27,7 @@ The logits are normalized by subtracting a learnable margin parameter ($m$) and 
 
 The final step involves applying the cross-entropy loss function on these margin-enhanced, temperature-scaled normalized logits and the target labels, promoting discriminative representations while maintaining the desired separation in the feature space.
 
-### Code
+### Python
 
 ```python
 class MarginEnhancedLogitNormLoss(torch.nn.Module):
@@ -45,6 +46,8 @@ class MarginEnhancedLogitNormLoss(torch.nn.Module):
         logit_norm = torch.div(x - self.margin, norms) / self.temperature
         return torch.nn.functional.cross_entropy(logit_norm, target)
 ```
+
+### Matlab
 
 ```matlab
 classdef MarginEnhancedLogitNormLoss < handle
