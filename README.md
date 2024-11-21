@@ -15,7 +15,7 @@ From an academic standpoint, OOD detection also addresses broader challenges in 
 ## Approach
 
 ```math
-\left( \sum_{k=1}^n a_k b_k \right)^2 \leq \left( \sum_{k=1}^n a_k^2 \right) \left( \sum_{k=1}^n b_k^2 \right)
+\frac{x - M}{|x|}
 ```
 
 The MarginEnhanced LogitNorm Loss is mathematically implemented by first computing the Euclidean norm ($L^2$ Norm) of the input vectors $x$, denoted as $\left\| x \right\|_2$, and ensuring numerical stability by adding a small constant ($10^7$).
