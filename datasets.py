@@ -114,8 +114,11 @@ def gaussian_noise(image, mean=0, std=0.1):
 
 def random_perturbation(image):
     if random.random() > 0.5:
-        angle, translate, scale, shear = random.uniform(-15, 15), (5, 5), 1.1, (5, 5)
-        image = affine(image, angle, translate, scale, shear, fillcolor=(0,))
+        angle = random.uniform(-15, 15)
+        translate = (random.randint(-5, 5), random.randint(-5, 5))
+        scale = random.uniform(0.9, 1.1)
+        shear = random.uniform(-5, 5)
+        image = affine(image, angle, translate, scale, shear, fill=0)
     else:
         image = gaussian_noise(image, mean=0, std=0.05)
     return image
