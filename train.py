@@ -14,7 +14,7 @@ from metrics import get_kappa
 from metrics import get_f1
 from scores import energy_score
 from scores import get_scores
-from losses import LogitNormLoss
+from losses import MarginEnhancedLogitNormLoss
 from sklearn.model_selection import KFold
 from copy import deepcopy
 
@@ -43,20 +43,19 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
     fold_model = None
     best_accuracy = float("-inf")
 
-    criterion = LogitNormLoss()
+    criterion = MarginEnhancedLogitNormLoss()
     cnn_params = [
         param for name, param in model.named_parameters() if not name.startswith("fc")
     ]
     fc_params = [
         param for name, param in model.named_parameters() if name.startswith("fc")
     ]
-    optimizer = torch.optim.SGD(
+    optimizer = torch.optim.Adam(
         [
             {"params": cnn_params, "lr": settings.lr},
             {"params": fc_params, "lr": settings.lr * 20},
             {"params": [criterion.temperature, criterion.margin], "lr": settings.lr},
         ],
-        momentum=0.9,
     )
     scheduler = torch.optim.lr_scheduler.StepLR(
         optimizer, gamma=settings.gamma, step_size=settings.step_size

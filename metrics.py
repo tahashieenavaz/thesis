@@ -4,6 +4,7 @@ import torch
 from functions import get_device
 from sklearn.metrics import cohen_kappa_score
 from sklearn.metrics import f1_score
+from sklearn.metrics import roc_curve
 
 
 def get_accuracy(model, dataloader) -> float:
@@ -104,3 +105,39 @@ def get_f1(model, dataloader, average="weighted"):
 
     f1 = f1_score(all_true, all_pred, average=average)
     return f1
+
+
+def get_fpr95(model, dataloader) -> float:
+    """
+    The `get_fpr95` function calculates the false positive rate at a true positive rate of 95% using a
+    model and a dataloader.
+
+    :param model: The `model` parameter in the `get_fpr95` function is typically a machine learning
+    model that has been trained to perform a specific task, such as image classification or object
+    detection.
+    :param dataloader: The `dataloader` is a PyTorch DataLoader object that provides batches of data to the model for evaluation. It is used to iterate
+    over the dataset in batches during the evaluation process. The DataLoader helps in efficiently
+    loading and preprocessing the data,
+    :return: The function `get_fpr95` returns the False Positive Rate (FPR) at a True Positive Rate
+    (TPR) of 0.95, calculated using the ROC curve generated from the model's predictions on the given
+    dataloader.
+    """
+    model.eval()
+    scores = []
+    labels = []
+
+    with torch.inference_mode():
+        for inputs, targets in dataloader:
+            inputs, targets = inputs.to(model.device), targets.to(model.device)
+            outputs = model(inputs)
+            probabilities = torch.softmax(outputs, dim=1)[:, 1]
+            scores.extend(probabilities.cpu().numpy())
+            labels.extend(targets.cpu().numpy())
+
+    scores = np.array(scores)
+    labels = np.array(labels)
+    fpr, tpr, thresholds = roc_curve(labels, scores)
+    tpr95_index = np.argmax(tpr >= 0.95)
+    fpr95 = fpr[tpr95_index]
+
+    return fpr95

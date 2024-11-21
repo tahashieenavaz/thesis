@@ -14,6 +14,10 @@ From an academic standpoint, OOD detection also addresses broader challenges in 
 
 ## Approach
 
+```math
+\left( \sum_{k=1}^n a_k b_k \right)^2 \leq \left( \sum_{k=1}^n a_k^2 \right) \left( \sum_{k=1}^n b_k^2 \right)
+```
+
 The MarginEnhanced LogitNorm Loss is mathematically implemented by first computing the Euclidean norm ($L^2$ Norm) of the input vectors $x$, denoted as $\left\| x \right\|_2$, and ensuring numerical stability by adding a small constant ($10^7$).
 
 The logits are normalized by subtracting a learnable margin parameter ($m$) and dividing the result by the norm. This operation enhances the decision boundary by introducing a margin between the logits. The normalized logits are then scaled by a learnable temperature parameter ($T$) to control the sharpness of the logits.
@@ -24,13 +28,15 @@ The final step involves applying the cross-entropy loss function on these margin
 
 ```python
 class MarginEnhancedLogitNormLoss(torch.nn.Module):
-    def __init__(self, temperature: float = 1.0, margin: float = 0.1):
-        super(LogitNormLoss, self).__init__()
+    def __init__(self, initial_temperature: float = 1.0, initial_margin: float = 0.1):
+        super(MarginEnhancedLogitNormLoss, self).__init__()
         self.device = get_device()
         self.temperature = torch.nn.Parameter(
-            torch.tensor(temperature, requires_grad=True)
+            torch.tensor(initial_temperature, requires_grad=True)
         )
-        self.margin = torch.nn.Parameter(torch.tensor(margin, requires_grad=True))
+        self.margin = torch.nn.Parameter(
+            torch.tensor(initial_margin, requires_grad=True)
+        )
 
     def forward(self, x, target):
         norms = torch.norm(x, p=2, dim=-1, keepdim=True) + pow(10, -7)
