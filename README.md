@@ -5,6 +5,7 @@
   - [Approach](#approach)
     - [Python](#python)
     - [Matlab](#matlab)
+  - [Dataset](#dataset)
   - [References](#references)
 
 ## Introduction
@@ -81,6 +82,28 @@ classdef MarginEnhancedLogitNormLoss < handle
     end
 end
 ```
+
+## Dataset
+
+<p float="left">
+  <img src="art/dataset-image-1.jpg" width="200" />
+  <img src="art/dataset-image-2.jpg" width="200" />
+  <img src="art/dataset-image-3.jpg" width="200" />
+</p>
+<p float="left">
+  <img src="art/dataset-image-4.jpg" width="200" />
+  <img src="art/dataset-image-5.jpg" width="200" />
+  <img src="art/dataset-image-6.jpg" width="200" />
+</p>
+<p float="left">
+  <img src="art/dataset-image-7.jpg" width="200" />
+  <img src="art/dataset-image-8.jpg" width="200" />
+  <img src="art/dataset-image-9.jpg" width="200" />
+</p>
+
+The dataset used for this research training was the portraits dataset provided by [Dr. Nanni](https://scholar.google.it/citations?user=5NSGzcQAAAAJ&hl=en) to make sure the comparison between already implemented approaches and new ideas is solid since he could instantly compare newly achieved performance metrics with the prior.
+
+It is comprised of 927 images divided into six different categories with the distribution shown in the figure.
 
 ## References
 
