@@ -54,24 +54,21 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
         [
             {"params": cnn_params, "lr": settings.lr},
             {"params": fc_params, "lr": settings.lr * 20},
-            {"params": [criterion.temperature], "lr": settings.lr},
+            {"params": [criterion.temperature, criterion.margin], "lr": settings.lr},
         ],
         momentum=0.9,
     )
     scheduler = torch.optim.lr_scheduler.StepLR(
         optimizer, gamma=settings.gamma, step_size=settings.step_size
     )
-
     test_dataloader = torch.utils.data.DataLoader(
         test, shuffle=False, batch_size=settings.batch_size
     )
-
     flush(f"fold {fold + 1} was started")
     for epoch in range(settings.epochs):
         train_dataloader = torch.utils.data.DataLoader(
             train, shuffle=True, batch_size=settings.batch_size
         )
-
         model.train()
         epoch_loss = 0
         for x_batch, y_batch in train_dataloader:
@@ -86,6 +83,7 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
         accuracy = get_accuracy(model, test_dataloader)
         if accuracy > best_accuracy:
             fold_model = deepcopy(model)
+            best_accuracy = accuracy
 
         flush(f"\tepoch {epoch + 1} was finished with {epoch_loss}")
     # epochs end
