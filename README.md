@@ -63,8 +63,8 @@ classdef MarginEnhancedLogitNormLoss < handle
                 obj.temperature = initial_temperature;
                 obj.margin = initial_margin;
             else
-                obj.temperature = 1.0;  % Default value
-                obj.margin = 0.1;       % Default value
+                obj.temperature = 1.0;
+                obj.margin = 0.1;
             end
         end
 
