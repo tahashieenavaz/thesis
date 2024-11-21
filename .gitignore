@@ -164,3 +164,4 @@ datasets/
 deploy.py
 *.slurm
 files.zip
+.DS_Store
