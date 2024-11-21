@@ -57,7 +57,6 @@ classdef MarginEnhancedLogitNormLoss < handle
     end
 
     methods
-        % Constructor
         function obj = MarginEnhancedLogitNormLoss(initial_temperature, initial_margin)
             if nargin > 0
                 obj.temperature = initial_temperature;
