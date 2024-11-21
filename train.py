@@ -3,7 +3,8 @@ import numpy as np
 import pandas as pd
 
 from datasets import portraits
-from datasets import cifar10
+from datasets import AugmentedDataset
+from datasets import random_perturbation
 from functions import get_device
 from functions import load_settings
 from functions import flush
@@ -22,7 +23,7 @@ from copy import deepcopy
 
 
 seed()
-dataset, num_classes = cifar10()
+dataset, num_classes = portraits()
 device = get_device()
 settings = load_settings()
 kf = KFold(n_splits=settings.folds)
@@ -43,6 +44,7 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
     best_accuracy = float("-inf")
 
     train = torch.utils.data.Subset(dataset, train_idx)
+    train = AugmentedDataset(train, random_perturbation)
     test = torch.utils.data.Subset(dataset, test_idx)
     test_dataloader = torch.utils.data.DataLoader(
         test, shuffle=False, batch_size=settings.batch_size

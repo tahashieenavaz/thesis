@@ -6,6 +6,7 @@ import random
 from functions import path
 from torchvision import transforms
 from torchvision.datasets import CIFAR10
+from torchvision.transforms.functional import affine, gaussian_blur
 
 
 class ImageDataset(torch.utils.data.Dataset):
@@ -25,6 +26,20 @@ class ImageDataset(torch.utils.data.Dataset):
             image = self.transform(image)
 
         return image, torch.tensor(label, dtype=torch.long)
+
+
+class AugmentedDataset(torch.utils.data.Dataset):
+    def __init__(self, original_dataset, perturbation_fn):
+        self.original_dataset = original_dataset
+        self.perturbation_fn = perturbation_fn
+
+    def __len__(self):
+        return len(self.original_dataset)
+
+    def __getitem__(self, idx):
+        image, label = self.original_dataset[idx]
+        augmented_image = self.perturbation_fn(image)
+        return augmented_image, label
 
 
 def build_transforms(convert_to_image: bool = True):
@@ -90,3 +105,17 @@ def cifar10():
     )
     dataset = torch.utils.data.ConcatDataset([train, test])
     return [dataset, 10]
+
+
+def gaussian_noise(image, mean=0, std=0.1):
+    noise = torch.randn_like(image) * std + mean
+    return torch.clamp(image + noise, 0, 1)
+
+
+def random_perturbation(image):
+    if random.random() > 0.5:
+        angle, translate, scale, shear = random.uniform(-15, 15), (5, 5), 1.1, (5, 5)
+        image = affine(image, angle, translate, scale, shear, fillcolor=(0,))
+    else:
+        image = gaussian_noise(image, mean=0, std=0.05)
+    return image
