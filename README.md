@@ -68,7 +68,7 @@ classdef MarginEnhancedLogitNormLoss < handle
         end
 
         function loss = forward(obj, x, target)
-            norms = sqrt(sum(x.^2, 2)) + 1e-7;  % Adding epsilon for stability
+            norms = sqrt(sum(x.^2, 2)) + 1e-7;
             logit_norm = (x - obj.margin) ./ norms / obj.temperature;
             loss = obj.cross_entropy(logit_norm, target);
         end
