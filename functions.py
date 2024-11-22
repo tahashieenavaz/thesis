@@ -171,15 +171,19 @@ def build_optimizer(model, criterion, lr: float = 0.1, theta: float = 0.01):
     fc_params = [
         param for name, param in model.named_parameters() if name.startswith("fc")
     ]
-    criterion_params = [criterion.temperature, criterion.margin]
-
+    criterion_params = [
+        criterion.temperature,
+        criterion.margin,
+        criterion.offset,
+        criterion.factor,
+    ]
     optimizer = torch.optim.SGD(
         [
             {"params": cnn_params, "lr": lr, "name": "cnn"},
             {"params": fc_params, "lr": lr * 20, "name": "fc"},
             {"params": criterion_params, "lr": theta, "name": "criterion"},
         ],
-        momentum=0.9,
+        momentum=0.5,
     )
 
     def step(epoch: int, verbose: bool = False) -> bool:

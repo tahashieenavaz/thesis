@@ -1,10 +1,8 @@
 import torch
-import numpy as np
 import pandas as pd
 
 from datasets import portraits
 from datasets import AugmentedDataset
-from datasets import random_perturbation
 from functions import get_device
 from functions import load_settings
 from functions import flush
@@ -17,7 +15,7 @@ from metrics import get_kappa
 from metrics import get_f1
 from scores import energy_score
 from scores import get_scores
-from losses import MarginEnhancedLogitNormLoss
+from losses import MarginEnhancedLogitNormLoss as LossFunction
 from sklearn.model_selection import KFold
 from copy import deepcopy
 
@@ -33,8 +31,6 @@ thresholds = []
 accuracies = []
 f1s = []
 kappas = []
-temperatures = []
-margins = []
 
 
 flush(f"The dataset has {num_classes} classes")
@@ -44,13 +40,13 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
     best_accuracy = float("-inf")
 
     train = torch.utils.data.Subset(dataset, train_idx)
-    train = AugmentedDataset(train, random_perturbation)
+    train = AugmentedDataset(train)
     test = torch.utils.data.Subset(dataset, test_idx)
     test_dataloader = torch.utils.data.DataLoader(
         test, shuffle=False, batch_size=settings.batch_size
     )
 
-    criterion = MarginEnhancedLogitNormLoss()
+    criterion = LossFunction()
     model = build_resnet(num_classes)
     optimizer, step = build_optimizer(
         model=model, criterion=criterion, lr=settings.lr, theta=settings.theta
@@ -94,8 +90,6 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
     thresholds.append(threshold)
     kappas.append(kappa)
     f1s.append(f1)
-    temperatures.append(criterion.temperature.item())
-    margins.append(criterion.margin.item())
 
     torch.save(fold_model.state_dict(), f"./models/fold-{fold + 1}.pt")
     flush(
@@ -109,8 +103,6 @@ results_df = pd.DataFrame(
         "threshold": thresholds,
         "kappa": kappas,
         "f1": f1s,
-        "margin": margins,
-        "temperature": temperatures,
     }
 )
 results_df.index.name = "id"

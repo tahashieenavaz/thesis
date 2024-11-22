@@ -6,7 +6,6 @@ import random
 from functions import path
 from torchvision import transforms
 from torchvision.datasets import CIFAR10
-from torchvision.transforms.functional import affine, gaussian_blur
 
 
 class ImageDataset(torch.utils.data.Dataset):
@@ -16,7 +15,7 @@ class ImageDataset(torch.utils.data.Dataset):
         self.transform = transform
 
     def __len__(self):
-        return len(self.images)
+        return len(self.labels)
 
     def __getitem__(self, idx):
         image = self.images[idx]
@@ -29,17 +28,39 @@ class ImageDataset(torch.utils.data.Dataset):
 
 
 class AugmentedDataset(torch.utils.data.Dataset):
-    def __init__(self, original_dataset, perturbation_fn):
+    def __init__(self, original_dataset, num_augmentations=5):
+        super(AugmentedDataset, self).__init__()
         self.original_dataset = original_dataset
-        self.perturbation_fn = perturbation_fn
+        self.num_augmentations = num_augmentations
+        self.augmentations = transforms.Compose(
+            [
+                transforms.RandomHorizontalFlip(),
+                transforms.RandomVerticalFlip(),
+                transforms.RandomRotation(30),
+                transforms.ColorJitter(
+                    brightness=0.5, contrast=0.5, saturation=0.5, hue=0.1
+                ),
+                transforms.RandomPerspective(distortion_scale=0.5, p=1.0),
+            ]
+        )
+
+        self.augmented_data = []
+        self.augmented_labels = []
+        self._create_augmented_dataset()
+
+    def _create_augmented_dataset(self):
+        for i in range(len(self.original_dataset)):
+            image, label = self.original_dataset[i]
+            for _ in range(self.num_augmentations):
+                augmented_image = self.augmentations(image)
+                self.augmented_data.append(augmented_image)
+                self.augmented_labels.append(label)
 
     def __len__(self):
-        return len(self.original_dataset)
+        return len(self.augmented_data)
 
     def __getitem__(self, idx):
-        image, label = self.original_dataset[idx]
-        augmented_image = self.perturbation_fn(image)
-        return augmented_image, label
+        return self.augmented_data[idx], self.augmented_labels[idx]
 
 
 def build_transforms(convert_to_image: bool = True):
@@ -105,20 +126,3 @@ def cifar10():
     )
     dataset = torch.utils.data.ConcatDataset([train, test])
     return [dataset, 10]
-
-
-def gaussian_noise(image, mean=0, std=0.1):
-    noise = torch.randn_like(image) * std + mean
-    return torch.clamp(image + noise, 0, 1)
-
-
-def random_perturbation(image):
-    if random.random() > 0.5:
-        angle = random.uniform(-15, 15)
-        translate = (random.randint(-5, 5), random.randint(-5, 5))
-        scale = random.uniform(0.9, 1.1)
-        shear = random.uniform(-5, 5)
-        image = affine(image, angle, translate, scale, shear, fill=0)
-    else:
-        image = gaussian_noise(image, mean=0, std=0.05)
-    return image
