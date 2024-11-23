@@ -13,5 +13,5 @@ class MarginEnhancedLogitNormLoss(torch.nn.Module):
 
     def forward(self, x, target):
         norms = torch.norm(x, p=2, dim=-1, keepdim=True) + pow(10, -7)
-        adjusted_logits = torch.div(x + self.shift, norms) * (1 + self.temperature)
+        adjusted_logits = torch.div(x + self.shift, norms) ** (self.temperature)
         return torch.nn.functional.cross_entropy(adjusted_logits, target)

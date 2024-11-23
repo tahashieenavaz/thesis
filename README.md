@@ -18,7 +18,7 @@ From an academic standpoint, OOD detection also addresses broader challenges in 
 ## Approach
 
 $$
-L_{MELN} = L_{CrossEntropy}[\frac{(x + M) * (1+T)}{|x|_2 + \epsilon}]
+L_{MELN} = L_{CrossEntropy}[\frac{(logits + M) * (1+T)}{|logits|_2 + \epsilon}, targets]
 $$
 
 <br />
