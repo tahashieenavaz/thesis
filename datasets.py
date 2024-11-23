@@ -28,7 +28,7 @@ class ImageDataset(torch.utils.data.Dataset):
 
 
 class AugmentedDataset(torch.utils.data.Dataset):
-    def __init__(self, original_dataset, num_augmentations=5):
+    def __init__(self, original_dataset, num_augmentations=2):
         super(AugmentedDataset, self).__init__()
         self.original_dataset = original_dataset
         self.num_augmentations = num_augmentations

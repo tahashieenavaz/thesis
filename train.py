@@ -31,6 +31,8 @@ thresholds = []
 accuracies = []
 f1s = []
 kappas = []
+shifts = []
+temperatures = []
 
 
 flush(f"The dataset has {num_classes} classes")
@@ -40,7 +42,6 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
     best_accuracy = float("-inf")
 
     train = torch.utils.data.Subset(dataset, train_idx)
-    train = AugmentedDataset(train)
     test = torch.utils.data.Subset(dataset, test_idx)
     test_dataloader = torch.utils.data.DataLoader(
         test, shuffle=False, batch_size=settings.batch_size
@@ -49,7 +50,12 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
     criterion = LossFunction()
     model = build_resnet(num_classes)
     optimizer, step = build_optimizer(
-        model=model, criterion=criterion, lr=settings.lr, theta=settings.theta
+        model=model,
+        criterion=criterion,
+        lr=settings.lr,
+        theta=settings.theta,
+        lr_decay=settings.lr_decay,
+        theta_decay=settings.theta_decay,
     )
 
     flush(f"fold {fold + 1} was started")
@@ -85,15 +91,19 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
     ).item()
     kappa = get_kappa(fold_model, test_dataloader)
     f1 = get_f1(fold_model, test_dataloader)
+    temperature = criterion.temperature.item()
+    shift = criterion.shift.item()
 
     accuracies.append(best_accuracy)
     thresholds.append(threshold)
     kappas.append(kappa)
     f1s.append(f1)
+    temperatures.append(temperature)
+    shifts.append(shift)
 
     torch.save(fold_model.state_dict(), f"./models/fold-{fold + 1}.pt")
     flush(
-        f"\n\taccuracy: {best_accuracy}, threshold: {threshold}, f1: {f1}, kappa: {kappa}"
+        f"\n\taccuracy: {best_accuracy}, threshold: {threshold}, temperature: {temperature}, shift: {shift}"
     )
 
 
@@ -103,6 +113,8 @@ results_df = pd.DataFrame(
         "threshold": thresholds,
         "kappa": kappas,
         "f1": f1s,
+        "temperature": temperatures,
+        "shift": shifts,
     }
 )
 results_df.index.name = "id"

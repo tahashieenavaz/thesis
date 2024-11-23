@@ -164,19 +164,21 @@ def build_resnet(num_classes: int):
     return model
 
 
-def build_optimizer(model, criterion, lr: float = 0.1, theta: float = 0.01):
+def build_optimizer(
+    model,
+    criterion,
+    lr: float = 0.1,
+    theta: float = 0.01,
+    lr_decay: float = 0.1,
+    theta_decay: float = 0.5,
+):
     cnn_params = [
         param for name, param in model.named_parameters() if not name.startswith("fc")
     ]
     fc_params = [
         param for name, param in model.named_parameters() if name.startswith("fc")
     ]
-    criterion_params = [
-        criterion.temperature,
-        criterion.margin,
-        criterion.offset,
-        criterion.factor,
-    ]
+    criterion_params = [criterion.temperature, criterion.shift]
     optimizer = torch.optim.SGD(
         [
             {"params": cnn_params, "lr": lr, "name": "cnn"},
@@ -192,11 +194,11 @@ def build_optimizer(model, criterion, lr: float = 0.1, theta: float = 0.01):
 
         for param_group in optimizer.param_groups:
             if param_group["name"] == "cnn":
-                param_group["lr"] = param_group["lr"] * 0.1
+                param_group["lr"] = param_group["lr"] * lr_decay
             elif param_group["name"] == "fc":
-                param_group["lr"] = param_group["lr"] * 0.1
+                param_group["lr"] = param_group["lr"] * lr_decay
             elif param_group["name"] == "criterion":
-                param_group["lr"] = param_group["lr"] * 0.8
+                param_group["lr"] = param_group["lr"] * theta_decay
 
         if verbose:
             for param_group in optimizer.param_groups:
