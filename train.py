@@ -2,7 +2,6 @@ import torch
 import pandas as pd
 
 from datasets import portraits
-from datasets import AugmentedDataset
 from functions import get_device
 from functions import load_settings
 from functions import flush
@@ -12,6 +11,7 @@ from functions import build_resnet
 from functions import build_optimizer
 from metrics import get_accuracy
 from metrics import get_kappa
+from metrics import get_std
 from metrics import get_f1
 from scores import energy_score
 from scores import get_scores
@@ -31,8 +31,7 @@ thresholds = []
 accuracies = []
 f1s = []
 kappas = []
-shifts = []
-temperatures = []
+stds = []
 
 
 flush(f"The dataset has {num_classes} classes")
@@ -79,7 +78,7 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
             best_accuracy = accuracy
 
         flush(
-            f"\tepoch {epoch + 1} was finished with loss: {epoch_loss}, accuracy: {accuracy}"
+            f"\tepoch: {epoch + 1}, loss: {epoch_loss}, accuracy: {accuracy}, criterion: {list(criterion.parameters())}"
         )
 
         step(epoch, verbose=False)
@@ -91,19 +90,17 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
     ).item()
     kappa = get_kappa(fold_model, test_dataloader)
     f1 = get_f1(fold_model, test_dataloader)
-    temperature = criterion.temperature.item()
-    shift = criterion.shift.item()
+    std = get_std(fold_model, test_dataloader)
 
     accuracies.append(best_accuracy)
     thresholds.append(threshold)
     kappas.append(kappa)
     f1s.append(f1)
-    temperatures.append(temperature)
-    shifts.append(shift)
+    stds.append(std)
 
     torch.save(fold_model.state_dict(), f"./models/fold-{fold + 1}.pt")
     flush(
-        f"\n\taccuracy: {best_accuracy}, threshold: {threshold}, temperature: {temperature}, shift: {shift}"
+        f"\n\taccuracy: {best_accuracy}, threshold: {threshold}, criterion: {list(criterion.parameters())}"
     )
 
 
@@ -113,8 +110,7 @@ results_df = pd.DataFrame(
         "threshold": thresholds,
         "kappa": kappas,
         "f1": f1s,
-        "temperature": temperatures,
-        "shift": shifts,
+        "std": stds,
     }
 )
 results_df.index.name = "id"

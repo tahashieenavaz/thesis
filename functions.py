@@ -23,15 +23,18 @@ def sha1(text: str):
     return hashlib.sha1(text.encode()).hexdigest()
 
 
+def get_seed() -> int:
+    base = "Taha Shieenavaz and Loris Nanni"
+    return int("".join(list(filter(lambda x: str.isdigit(x), sha1(base)))[:8]))
+
+
 def seed():
     """
     The function `seed()` generates a seed value based on a given string and uses it to set the random
     seed for PyTorch and NumPy.
     """
-    base = "Taha Shieenavaz and Loris Nanni"
-    seed_value = int("".join(list(filter(lambda x: str.isdigit(x), sha1(base)))[:8]))
-    torch.manual_seed(seed_value)
-    np.random.seed(seed_value)
+    torch.manual_seed(get_seed())
+    np.random.seed(get_seed())
 
 
 def create_folder(folder_path: str) -> None:
@@ -167,10 +170,10 @@ def build_resnet(num_classes: int):
 def build_optimizer(
     model,
     criterion,
-    lr: float = 0.1,
-    theta: float = 0.01,
-    lr_decay: float = 0.1,
-    theta_decay: float = 0.5,
+    lr: float,
+    lr_decay: float,
+    theta: float,
+    theta_decay: float,
 ):
     cnn_params = [
         param for name, param in model.named_parameters() if not name.startswith("fc")
@@ -178,14 +181,13 @@ def build_optimizer(
     fc_params = [
         param for name, param in model.named_parameters() if name.startswith("fc")
     ]
-    criterion_params = [criterion.temperature, criterion.shift]
     optimizer = torch.optim.SGD(
         [
             {"params": cnn_params, "lr": lr, "name": "cnn"},
             {"params": fc_params, "lr": lr * 20, "name": "fc"},
-            {"params": criterion_params, "lr": theta, "name": "criterion"},
+            {"params": criterion.parameters(), "lr": theta, "name": "criterion"},
         ],
-        momentum=0.5,
+        momentum=0.9,
     )
 
     def step(epoch: int, verbose: bool = False) -> bool:
