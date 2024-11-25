@@ -174,6 +174,7 @@ def build_optimizer(
     lr_decay: float,
     theta: float,
     theta_decay: float,
+    step_size: int = 10,
 ):
     cnn_params = [
         param for name, param in model.named_parameters() if not name.startswith("fc")
@@ -191,7 +192,7 @@ def build_optimizer(
     )
 
     def step(epoch: int, verbose: bool = False) -> bool:
-        if (epoch + 1) % 10 != 0:
+        if (epoch + 1) % step_size != 0:
             return False
 
         for param_group in optimizer.param_groups:

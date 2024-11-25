@@ -2,6 +2,7 @@ import torch
 import pandas as pd
 
 from datasets import portraits
+from datasets import AugmentedDataset
 from functions import get_device
 from functions import load_settings
 from functions import flush
@@ -15,7 +16,7 @@ from metrics import get_std
 from metrics import get_f1
 from scores import energy_score
 from scores import get_scores
-from losses import MarginEnhancedLogitNormLoss as LossFunction
+from losses import MultiClassHingeLoss as LossFunction
 from sklearn.model_selection import KFold
 from copy import deepcopy
 
@@ -41,6 +42,7 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
     best_accuracy = float("-inf")
 
     train = torch.utils.data.Subset(dataset, train_idx)
+    train = AugmentedDataset(train)
     test = torch.utils.data.Subset(dataset, test_idx)
     test_dataloader = torch.utils.data.DataLoader(
         test, shuffle=False, batch_size=settings.batch_size
@@ -55,6 +57,7 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(dataset)):
         theta=settings.theta,
         lr_decay=settings.lr_decay,
         theta_decay=settings.theta_decay,
+        step_size=settings.step_size,
     )
 
     flush(f"fold {fold + 1} was started")
