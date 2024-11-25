@@ -32,21 +32,28 @@ The final step involves applying the cross-entropy loss function on these margin
 ### Python
 
 ```python
-class MarginEnhancedLogitNormLoss(torch.nn.Module):
-    def __init__(self, initial_temperature: float = 1.0, initial_margin: float = 0.1):
-        super(MarginEnhancedLogitNormLoss, self).__init__()
-        self.device = get_device()
-        self.temperature = torch.nn.Parameter(
-            torch.tensor(initial_temperature, requires_grad=True)
-        )
-        self.margin = torch.nn.Parameter(
-            torch.tensor(initial_margin, requires_grad=True)
-        )
+class MarginTemperatureEnhancedHingeLoss(torch.nn.Module):
+    def __init__(self, margin: float = 1.0, tradeoff: float = 0.5):
+        super(MarginTemperatureEnhancedHingeLoss, self).__init__()
+        self.margin = margin
+        self.tradeoff = tradeoff
+        self.temperature = torch.nn.Parameter(torch.tensor(1.0, requires_grad=True))
+        self.boost = torch.nn.Parameter(torch.tensor(1.0, requires_grad=True))
 
-    def forward(self, x, target):
-        norms = torch.norm(x, p=2, dim=-1, keepdim=True) + pow(10, -7)
-        logit_norm = torch.div(x - self.margin, norms) / self.temperature
-        return torch.nn.functional.cross_entropy(logit_norm, target)
+    def forward(self, logits, targets):
+        norms = torch.norm(logits, p=2, dim=-1, keepdim=True) + pow(10, -7)
+        logits = torch.div(logits, norms + torch.relu(self.boost))
+        logits = logits / torch.clamp(self.temperature, min=1)
+
+        batch_size = logits.size()[0]
+        true_class_logits = logits[torch.arange(batch_size), targets].unsqueeze(1)
+
+        margins = self.margin + logits - true_class_logits
+        margins[torch.arange(batch_size), targets] = 0
+
+        return (
+            torch.clamp(margins, min=0).sum(dim=1).mean() - self.tradeoff * logits.std()
+        )
 ```
 
 ### Matlab

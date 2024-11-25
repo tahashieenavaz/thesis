@@ -16,7 +16,7 @@ from metrics import get_std
 from metrics import get_f1
 from scores import energy_score
 from scores import get_scores
-from losses import MultiClassHingeLoss as LossFunction
+from losses import MarginTemperatureEnhancedHingeLoss as LossFunction
 from sklearn.model_selection import KFold
 from copy import deepcopy
 

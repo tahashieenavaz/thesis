@@ -17,10 +17,11 @@ class MarginEnhancedLogitNormLoss(torch.nn.Module):
         return torch.nn.functional.cross_entropy(adjusted_logits, target)
 
 
-class MultiClassHingeLoss(torch.nn.Module):
-    def __init__(self, margin=1.0):
-        super(MultiClassHingeLoss, self).__init__()
+class MarginTemperatureEnhancedHingeLoss(torch.nn.Module):
+    def __init__(self, margin: float = 1.0, tradeoff: float = 0.5):
+        super(MarginTemperatureEnhancedHingeLoss, self).__init__()
         self.margin = margin
+        self.tradeoff = tradeoff
         self.temperature = torch.nn.Parameter(torch.tensor(1.0, requires_grad=True))
         self.boost = torch.nn.Parameter(torch.tensor(1.0, requires_grad=True))
 
@@ -35,4 +36,6 @@ class MultiClassHingeLoss(torch.nn.Module):
         margins = self.margin + logits - true_class_logits
         margins[torch.arange(batch_size), targets] = 0
 
-        return torch.clamp(margins, min=0).sum(dim=1).mean() - 0.5 * logits.std()
+        return (
+            torch.clamp(margins, min=0).sum(dim=1).mean() - self.tradeoff * logits.std()
+        )
