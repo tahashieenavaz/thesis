@@ -18,7 +18,7 @@ From an academic standpoint, OOD detection also addresses broader challenges in 
 ## Approach
 
 $$
-L_{MELN} = L_{MultiClassHinge}[\frac{logits * \phi}{(|logits + ReLU(\theta)|_2 + \epsilon)}, targets]
+L_{MELN} = L_{MultiClassHinge}[\frac{logits}{(|logits + ReLU(\theta)|_2 + \epsilon)} * \phi, targets]
 $$
 
 <br />
