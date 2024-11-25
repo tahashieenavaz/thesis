@@ -85,11 +85,11 @@ def old_dataset(filename):
     ]
 
 
-def planktons(filename="planktons.mat"):
+def breast_grading(filename="bg.mat"):
     return old_dataset(filename)
 
 
-def fibers(filename="fibers.mat"):
+def muscle_age(filename="ma.mat"):
     return old_dataset(filename)
 
 

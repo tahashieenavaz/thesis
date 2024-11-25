@@ -18,17 +18,17 @@ class MarginEnhancedLogitNormLoss(torch.nn.Module):
 
 
 class MarginTemperatureEnhancedHingeLoss(torch.nn.Module):
-    def __init__(self, margin: float = 1.0, tradeoff: float = 0.5):
+    def __init__(self, margin: float = 1.0, tradeoff: float = 0.1):
         super(MarginTemperatureEnhancedHingeLoss, self).__init__()
         self.margin = margin
         self.tradeoff = tradeoff
-        self.temperature = torch.nn.Parameter(torch.tensor(1.0, requires_grad=True))
-        self.boost = torch.nn.Parameter(torch.tensor(1.0, requires_grad=True))
+        self.phi = torch.nn.Parameter(torch.tensor(1.0, requires_grad=True))
+        self.theta = torch.nn.Parameter(torch.tensor(1.0, requires_grad=True))
 
     def forward(self, logits, targets):
+        logits = logits + torch.relu(self.theta)
         norms = torch.norm(logits, p=2, dim=-1, keepdim=True) + pow(10, -7)
-        logits = torch.div(logits, norms + torch.relu(self.boost))
-        logits = logits / torch.clamp(self.temperature, min=1)
+        logits = self.phi * torch.div(logits, norms)
 
         batch_size = logits.size()[0]
         true_class_logits = logits[torch.arange(batch_size), targets].unsqueeze(1)
