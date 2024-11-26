@@ -1,4 +1,5 @@
 import torch
+import random
 import json
 import numpy as np
 import hashlib
@@ -30,11 +31,12 @@ def get_seed() -> int:
 
 def seed():
     """
-    The function `seed()` generates a seed value based on a given string and uses it to set the random
-    seed for PyTorch and NumPy.
+    The function `seed()` sets the random seed for PyTorch, NumPy, and Python's random module using a
+    common seed value obtained from `get_seed()`.
     """
     torch.manual_seed(get_seed())
     np.random.seed(get_seed())
+    random.seed(get_seed())
 
 
 def create_folder(folder_path: str) -> None:
