@@ -47,6 +47,8 @@ The dataset used for this research training was the portraits dataset provided b
     <img src="art/dataset-image-9.jpg" width="100" />
 </div>
 
+<br />
+
 The dataset consists of a total of 927 images, meticulously categorized into six distinct groups. The figure provides a visual representation of the distribution of images across these categories, offering insights into the dataset's composition.
 
 <div align="center">
