@@ -36,6 +36,6 @@ class MarginTemperatureEnhancedHingeLoss(torch.nn.Module):
         margins = self.margin + logits - true_class_logits
         margins[torch.arange(batch_size), targets] = 0
 
-        return (
-            torch.clamp(margins, min=0).sum(dim=1).mean() - self.tradeoff * logits.std()
-        )
+        std_term = self.tradeoff * logits.std(dim=1).mean()
+
+        return torch.clamp(margins, min=0).sum(dim=1).mean() - std_term
